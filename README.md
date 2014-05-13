@@ -31,10 +31,33 @@ Installation:
 
 TODO: Make github2jenkins installable with pip
 
+# Example usage
+
+    stain@biggie-mint ~/src/github2jenkins $ python github2jenkins.py
+    Github user stain, password [empty: read-only]: 
+    Jenkins: http://build.mygrid.org.uk/ci/
+    Password for user stain [empty: read-only]: 
+    - taverna-activity-test-utils
+    - taverna-apiconsumer-activity
+    - taverna-apiconsumer-activity-ui
+    + taverna-baclava-utilities
+    - taverna-beanshell-activity
+    + taverna-beanshell-activity-ui
+    - taverna-biomart-activity
+    - taverna-biomart-activity-ui
+
+This indicates that Jenkins jobs `taverna-baclava-utilities` and 
+`taverna-beanshell-activity-ui` was created. The remaining jobs
+correspond to the GitHub repositories, but already exist (e.g.
+because the script was run earlier).
+
+
 # Configuration
 
+TODO: Move all configuration to `~/.github2jenkins`
 
-This script has partial configuration as global variables at its top. 
+This script is configured by editing the global variables.
+
 You need to edit the script to configure your repositories
 and Jenkins server:
 
@@ -86,13 +109,9 @@ and Jenkins server:
 
 
 
-
-
-TODO: Move all configuration to ~/.github2jenkins
-
-The script will assume the current Unix username unless {JENKIS_USER}
+The script will assume the current Unix username unless `JENKIS_USER`
 has been set.
 
 The script will ask interactively for the Jenkins password unless
-the environment variable {{JENKINS_PASSWORD}} has been set.
+the environment variable `JENKINS_PASSWORD` has been set.
 
