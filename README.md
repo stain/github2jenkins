@@ -21,8 +21,10 @@ created.
 # Dependencies
 
  * [Python](http://www.python.org/) 2.6 or later
+ * [pip](http://www.pip-installer.org/)
  * [github3.py](https://pypi.python.org/pypi/github3.py/0.1)
  * [jenkinsapi](https://github3py.readthedocs.org/)
+ * A Jenkins instance
  
 Installation:
 
