@@ -90,7 +90,7 @@ and Jenkins server:
 
 TODO: Move all configuration to ~/.github2jenkins
 
-The script will assume the current Unix username unless {{JENKIS_USER}}
+The script will assume the current Unix username unless {JENKIS_USER}
 has been set.
 
 The script will ask interactively for the Jenkins password unless
