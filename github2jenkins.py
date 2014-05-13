@@ -6,11 +6,22 @@ Create Jenkins job corresponding to each Github repository.
 
 import os
 import getpass
+from ConfigParser import ConfigParser
 import github3
 import jenkinsapi
 
+
 # Github user(s) which repositories are to be created in Jenkins
+# Needed to avoid rate limits of 60 request/hour
 GITHUB_USERS = ["taverna"]
+
+# Github username for authentication
+GITHUB_AUTH_USER = os.environ.get("JENKINS_USER") or getpass.getuser()
+
+# Scope of Github API access
+# []                # public read-only
+# ["repo", "user"]  # private repos
+GITHUB_SCOPES = []
 
 # Branches which existance means a corresponding Jenkins job is
 # created. The job will be called $repository-$branch, except for 
@@ -66,7 +77,7 @@ def jenkins():
         # Need to ask for password    
         print "Jenkins:", JENKINS
         password = getpass.getpass("Password for user " + JENKINS_USER +
-                                   " [empty for read-only]: ")
+                                   " [empty: read-only]: ")
 
     if not password: 
         _jenkins = jenkinsapi.jenkins.Jenkins(JENKINS)
@@ -79,6 +90,68 @@ def repos(username, must_have_branch):
        if repo.branch(must_have_branch):
             yield repo
 
+def _configpath():
+    configpath = os.path.expanduser("~/.github2jenkins")
+    if not os.path.exists(configpath):
+        open(configpath, "w").close()
+        os.chmod(configpath, 0600)
+    return configpath
+
+_config = None
+def config():
+    global _config
+    if _config is not None:
+        return _config
+    _config = ConfigParser()        
+    _config.read(_configpath())
+    return _config
+
+def save_config():
+    fp = open(_configpath(), "w")
+    try:
+        config().write(fp)
+    finally:
+        fp.close()
+
+
+_github = None
+def github():
+    global _github
+    # Have we made one earlier today?
+    if _github is not None:
+        return _github
+
+    # See if we have a token
+    _github = _github_w_token()
+    if _github is not None:
+        return _github
+
+    password = getpass.getpass("Github user {0}, password [empty: read-only]: ".format(GITHUB_AUTH_USER))
+    if not password:
+        _github = github3.GitHub() # anonymous
+        return _github
+
+    # Create OAuth token
+    note = "github2jenkins" 
+    note_url = "https://github.com/stain/github2jenkins"
+    auth = github3.authorize(GITHUB_AUTH_USER, password, GITHUB_SCOPES, note, note_url)
+    print auth
+    print auth.token
+    print auth.id
+    if not config().has_section("github"):
+        config().add_section("github")
+    config().set("github", "token", auth.token)
+    config().set("github", "id", auth.id)
+    save_config()
+    return _github_w_token() 
+    
+def _github_w_token():
+    if not config().has_section("github"):
+        return None
+    token = config().get("github", "token")
+    # Do we need the id for anything?
+    #github_id = config().get("github", "id")
+    return github3.login(token=token)
 
 _jenkins_template = None
 def create_template(job_name, repository):
