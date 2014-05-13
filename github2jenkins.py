@@ -26,7 +26,7 @@ GITHUB_SCOPES = []
 # Branches which existance means a corresponding Jenkins job is
 # created. The job will be called $repository-$branch, except for 
 # the master branch, which is simply $repository
-BRANCHES = ["master", "maintenance"]
+BRANCHES = ["maintenance", "master"]
 
 # Jenkins instance where jobs will be created, e.g.
 # http://localhost:8080/jenkins/
@@ -62,12 +62,13 @@ class Github2JenkinsException(Exception):
     pass 
 
 
-gh = github3.GitHub()
+_readonly = False
 
 
 _jenkins = None
 
 def jenkins():
+    global _readonly
     global _jenkins
     if _jenkins is not None:
         return _jenkins
@@ -81,12 +82,13 @@ def jenkins():
 
     if not password: 
         _jenkins = jenkinsapi.jenkins.Jenkins(JENKINS)
+        _readonly = True
     else:
         _jenkins = jenkinsapi.jenkins.Jenkins(JENKINS, JENKINS_USER, password)
     return _jenkins    
 
 def repos(username, must_have_branch):
-   for repo in gh.iter_user_repos(username):
+   for repo in github().iter_user_repos(username):
        if repo.branch(must_have_branch):
             yield repo
 
@@ -154,13 +156,44 @@ def _github_w_token():
     return github3.login(token=token)
 
 _jenkins_template = None
-def create_template(job_name, repository):
+def jenkins_job_template():
     global _jenkins_template
     if _jenkins_template is not None:
         return _jenkins_template
-    _jenkins_template = jenkins()[JENKINS_JOB_TEMPLATE]    
-    if not _jenkins_template:
-        raise Github2JenkinsException("Can't find template " + JENKINS_JOB_TEMPLATE)
+
+    _jenkins_template_job = jenkins()[JENKINS_JOB_TEMPLATE]   
+    if not _jenkins_template_job:
+        raise Github2JenkinsException("Can't find template job " + JENKINS_JOB_TEMPLATE)
+
+    _jenkins_template = _jenkins_template_job.get_config()
     return _jenkins_template
+    
 
 
+def create_jenkins_job(name, repository, branch):
+    job = jenkins_job_template()
+    job = job.replace(JENKINS_JOB_TEMPLATE_REPO, str(repository))
+    job = job.replace(JENKINS_JOB_TEMPLATE, repository.name)
+    job = job.replace("master", branch)
+    print job 
+    return jenkins().create_job(name, job)
+
+def main():
+    for user in GITHUB_USERS:
+        for branch in BRANCHES:
+            for repo in repos(user, branch):
+                name = repo.name
+                if branch != "master":
+                    name += "-maintenance"
+
+                if name in jenkins():
+                    print "+", name
+                    continue
+                else:
+                    print "-", name
+                
+                create_jenkins_job(name, repo, branch) 
+                return None
+                
+
+if __name__=="__main__": main()    
