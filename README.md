@@ -3,7 +3,7 @@ github2jenkins
 
 Create Jenkins jobs per Github repository
 
-(c) myGrid, University of Manchester 2014
+(c) [myGrid](http://www.mygrid.org.uk/), University of Manchester 2014
 
 
 This script will go through the configured Github users and create a 
