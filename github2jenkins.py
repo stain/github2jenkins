@@ -26,7 +26,7 @@ GITHUB_SCOPES = []
 # Branches which existance means a corresponding Jenkins job is
 # created. The job will be called $repository-$branch, except for 
 # the master branch, which is simply $repository
-BRANCHES = ["maintenance", "master"]
+BRANCHES = ["master", "maintenance"]
 
 # Jenkins instance where jobs will be created, e.g.
 # http://localhost:8080/jenkins/
