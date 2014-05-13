@@ -175,7 +175,7 @@ def create_jenkins_job(name, repository, branch):
     job = job.replace(JENKINS_JOB_TEMPLATE_REPO, str(repository))
     job = job.replace(JENKINS_JOB_TEMPLATE, repository.name)
     job = job.replace("master", branch)
-    print job 
+    #print job 
     return jenkins().create_job(name, job)
 
 def main():
