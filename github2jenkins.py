@@ -187,13 +187,12 @@ def main():
                     name += "-maintenance"
 
                 if name in jenkins():
-                    print "+", name
+                    print "-", name
                     continue
                 else:
-                    print "-", name
+                    print "+", name
                 
                 create_jenkins_job(name, repo, branch) 
-                return None
                 
 
 if __name__=="__main__": main()    
