@@ -7,13 +7,15 @@ Create Jenkins jobs per Github repository
 
 
 This script will go through the configured Github users and create a 
-Jenkins job for each repository, unless one already exists.
+[Jenkins](http://jenkins-ci.org/) build job for each repository, unless
+one already exists.
 
 The repository names are assumed to be unique across the specified users.
 
-A pre-existing Jenkins Github job (typically made in the Jenkins web
-interface) must be specified as a template. Naive search-replace
-customize its configuration per repository (e.g. replacing the github URLs)
+A pre-existing Jenkins job (typically made in the Jenkins web
+interface), using a Github repository, must be specified as a template. 
+Simple search-replace customize its configuration per repository
+(e.g. replacing the github URLs).
 
 Several branches can be specified, in which case a job per branch is
 created.
