@@ -20,9 +20,9 @@ created.
 
 # Dependencies
 
- * Python 2.6 or later
+ * [Python](http://www.python.org/) 2.6 or later
  * [github3.py](https://pypi.python.org/pypi/github3.py/0.1)
- * [jenkinsapi](https://pypi.python.org/pypi/jenkinsap)
+ * [jenkinsapi](https://github3py.readthedocs.org/)
  
 Installation:
 
