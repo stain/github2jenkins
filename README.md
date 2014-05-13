@@ -36,7 +36,57 @@ TODO: Make github2jenkins installable with pip
 
 This script has partial configuration as global variables at its top. 
 You need to edit the script to configure your repositories
-and Jenkins server.
+and Jenkins server:
+
+    # Github user(s) which repositories are to be created in Jenkins
+    # Needed to avoid rate limits of 60 request/hour
+    GITHUB_USERS = ["taverna"]
+ 
+    # Github username for authentication
+    GITHUB_AUTH_USER = os.environ.get("JENKINS_USER") or getpass.getuser()
+ 
+    # Scope of Github API access
+    # []                # public read-only
+    # ["repo", "user"]  # private repos
+    GITHUB_SCOPES = []
+ 
+    # Branches which existance means a corresponding Jenkins job is
+    # created. The job will be called $repository-$branch, except for 
+    # the master branch, which is simply $repository
+    BRANCHES = ["master", "maintenance"]
+ 
+    # Jenkins instance where jobs will be created, e.g.
+    # http://localhost:8080/jenkins/
+    JENKINS = "http://build.mygrid.org.uk/ci/"
+ 
+    # Pre-existing Jenkins job which config is
+    # to be used as a template for any new jobs
+    # 
+    # Note: The template must be both a valid 
+    # Jenkins name and a Github repository
+    # as naive search-replace is used on the
+    # Jenkins Job Config XML
+    # The string "master" will be search-replaced for
+    # other branches
+    JENKINS_JOB_TEMPLATE = "taverna-wsdl-activity"
+    # The pre-configured user/repo substring of the github URLs in the
+    # Jenkins job-template - this will be search-replaced to
+    # $user/$repo
+    JENKINS_JOB_TEMPLATE_REPO = "taverna/taverna-wsdl-activity"
+ 
+    # Jenkins user with write-access in Jenkins
+    # The library will prompt on the console at runtime for
+    # the jenkins password.
+    #
+    # Set the user to None for readonly mode, in  which case
+    # new Jenkins jobs will not be created, but their name
+    # printed on the console.
+    # 
+    JENKINS_USER = os.environ.get("JENKINS_USER") or getpass.getuser()
+
+
+
+
 
 TODO: Move all configuration to ~/.github2jenkins
 
