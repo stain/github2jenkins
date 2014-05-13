@@ -51,6 +51,11 @@ This indicates that Jenkins jobs `taverna-baclava-utilities` and
 correspond to the GitHub repositories, but already exist (e.g.
 because the script was run earlier).
 
+The Github password is only needed once, as an OAuth token
+is stored in `~/github2jenkins`. The default permissions for
+this (`GITHUB_SCOPES`) is read-only anonymous access and
+so is not particularly sensitive.
+
 
 # Configuration
 
