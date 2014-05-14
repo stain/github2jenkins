@@ -173,15 +173,23 @@ def jenkins_job_template():
 def job_config_for(name, repository, branch):
     job = jenkins_job_template()
     job = job.replace(JENKINS_JOB_TEMPLATE_REPO, str(repository))
-    job = job.replace(JENKINS_JOB_TEMPLATE, repository.name)
-    job = job.replace("master", branch)
+    # Now done by set_scm_on_job()
+    #job = job.replace(JENKINS_JOB_TEMPLATE, repository.name)
+    #job = job.replace("master", branch)
     return job
+
+def set_scm_on_job(job, repository, branch):
+    job.modify_scm_branch(branch)
+    job.modify_scm_url(repository.git_url)
 
 def create_jenkins_job(name, repository, branch):
     if _readonly:
         return
     job_config = job_config_for(name, repository, branch)
-    return jenkins().create_job(name, job_config)
+    job = jenkins().create_job(name, job_config)
+    set_scm_on_job(job, repository, branch)
+    job.enable()
+    return job
 
 def update_jenkins_job(name, repository, branch):
     if _readonly:
@@ -189,6 +197,7 @@ def update_jenkins_job(name, repository, branch):
     job = jenkins()[name]
     job_config = job_config_for(name, repository, branch)
     job.update_config(job_config)
+    set_scm_on_job(job, repository, branch)
     return job
 
 def main(args):
