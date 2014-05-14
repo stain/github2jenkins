@@ -189,10 +189,7 @@ def update_jenkins_job(name, repository, branch):
 
 def main(args):
     force = "-f" in args or "--force" in args
-    readonly = "-r" in args or "--read-only" in args
-    if readonly and force:
-        print >>sys.stderr, "options --read-only and --force can't be combined" 
-        return -1
+    writable = not ("-r" in args or "--read-only" in args)
     for user in GITHUB_USERS:
         for branch in BRANCHES:
             for repo in repos(user, branch):
@@ -202,14 +199,14 @@ def main(args):
 
                 if name in jenkins():
                     if force:
-                        update_jenkins_job(name, repo, branch)   
+                        writable and update_jenkins_job(name, repo, branch)   
                         print "*", name
                     else:
                         print "-", name
 
                 else:
                     print "+", name
-                    create_jenkins_job(name, repo, branch) 
+                    writable and create_jenkins_job(name, repo, branch) 
                 
 
 if __name__=="__main__": 
