@@ -42,11 +42,11 @@ JENKINS = "http://build.mygrid.org.uk/ci/"
 # Jenkins Job Config XML
 # The string "master" will be search-replaced for
 # other branches
-JENKINS_JOB_TEMPLATE = "taverna-wsdl-activity"
+JENKINS_JOB_TEMPLATE = "-taverna-template-job-"
 # The pre-configured user/repo substring of the github URLs in the
 # Jenkins job-template - this will be search-replaced to
 # $user/$repo
-JENKINS_JOB_TEMPLATE_REPO = "taverna/taverna-wsdl-activity"
+JENKINS_JOB_TEMPLATE_REPO = "taverna/-taverna-template-job-"
 
 class Github2JenkinsException(Exception):
     pass 
