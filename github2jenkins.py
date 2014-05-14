@@ -4,6 +4,7 @@
 Create Jenkins job corresponding to each Github repository.
 """
 
+import sys
 import os
 import getpass
 from ConfigParser import ConfigParser
@@ -169,16 +170,29 @@ def jenkins_job_template():
     return _jenkins_template
     
 
-
-def create_jenkins_job(name, repository, branch):
+def job_config_for(name, repository, branch):
     job = jenkins_job_template()
     job = job.replace(JENKINS_JOB_TEMPLATE_REPO, str(repository))
     job = job.replace(JENKINS_JOB_TEMPLATE, repository.name)
     job = job.replace("master", branch)
-    #print job 
-    return jenkins().create_job(name, job)
+    return job
 
-def main():
+def create_jenkins_job(name, repository, branch):
+    job_config = job_config_for(name, repository, branch)
+    return jenkins().create_job(name, job_config)
+
+def update_jenkins_job(name, repository, branch):
+    job = jenkins()[name]
+    job_config = job_config_for(name, repository, branch)
+    job.update_config(job_config)
+    return job
+
+def main(args):
+    force = "-f" in args or "--force" in args
+    readonly = "-r" in args or "--read-only" in args
+    if readonly and force:
+        print >>sys.stderr, "options --read-only and --force can't be combined" 
+        return -1
     for user in GITHUB_USERS:
         for branch in BRANCHES:
             for repo in repos(user, branch):
@@ -187,12 +201,19 @@ def main():
                     name += "-maintenance"
 
                 if name in jenkins():
-                    print "-", name
-                    continue
+                    if force:
+                        update_jenkins_job(name, repo, branch)   
+                        print "*", name
+                    else:
+                        print "-", name
+
                 else:
                     print "+", name
-                
-                create_jenkins_job(name, repo, branch) 
+                    create_jenkins_job(name, repo, branch) 
                 
 
-if __name__=="__main__": main()    
+if __name__=="__main__": 
+    status = main(sys.argv[1:])
+    if status:
+        sys.exit(status)
+
