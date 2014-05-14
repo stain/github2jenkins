@@ -48,17 +48,6 @@ JENKINS_JOB_TEMPLATE = "taverna-wsdl-activity"
 # $user/$repo
 JENKINS_JOB_TEMPLATE_REPO = "taverna/taverna-wsdl-activity"
 
-# Jenkins user with write-access in Jenkins
-# The library will prompt on the console at runtime for
-# the jenkins password.
-#
-# Set the user to None for readonly mode, in  which case
-# new Jenkins jobs will not be created, but their name
-# printed on the console.
-# 
-JENKINS_USER = os.environ.get("JENKINS_USER") or getpass.getuser()
-
-
 class Github2JenkinsException(Exception):
     pass 
 
@@ -67,25 +56,36 @@ _readonly = False
 
 
 _jenkins = None
-
 def jenkins():
     global _readonly
     global _jenkins
     if _jenkins is not None:
         return _jenkins
-
-    password = os.environ.get("JENKINS_PASSWORD")
-    if JENKINS_USER and not password:
-        # Need to ask for password    
-        print "Jenkins:", JENKINS
-        password = getpass.getpass("Password for user " + JENKINS_USER +
-                                   " [empty: read-only]: ")
+    if config().has_section("jenkins"):
+        url = config().get("jenkins", "url")
+        user = config().get("jenkins", "user")
+        password = config().get("jenkins", "password")
+    else: 
+        url = JENKINS
+        user = os.environ.get("JENKINS_USER") or getpass.getuser()
+        password = os.environ.get("JENKINS_PASSWORD")
+        if user and not password:
+            # Need to ask for password    
+            print "Jenkins:", JENKINS
+            password = getpass.getpass("Password for user " + user +
+                                       " [empty: read-only]: ")
+            if password:
+                if not config().has_section("jenkins"):
+                    config().add_section("jenkins")
+                config().set("jenkins", "user", user)
+                config().set("jenkins", "password", password)
+                config().set("jenkins", "url", url)
 
     if not password: 
-        _jenkins = jenkinsapi.jenkins.Jenkins(JENKINS)
+        _jenkins = jenkinsapi.jenkins.Jenkins(url)
         _readonly = True
     else:
-        _jenkins = jenkinsapi.jenkins.Jenkins(JENKINS, JENKINS_USER, password)
+        _jenkins = jenkinsapi.jenkins.Jenkins(url, user, password)
     return _jenkins    
 
 def repos(username, must_have_branch):
@@ -178,10 +178,14 @@ def job_config_for(name, repository, branch):
     return job
 
 def create_jenkins_job(name, repository, branch):
+    if _readonly:
+        return
     job_config = job_config_for(name, repository, branch)
     return jenkins().create_job(name, job_config)
 
 def update_jenkins_job(name, repository, branch):
+    if _readonly:
+        return
     job = jenkins()[name]
     job_config = job_config_for(name, repository, branch)
     job.update_config(job_config)
