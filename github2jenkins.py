@@ -198,6 +198,7 @@ def update_jenkins_job(name, repository, branch):
     job_config = job_config_for(name, repository, branch)
     job.update_config(job_config)
     set_scm_on_job(job, repository, branch)
+    job.enable()
     return job
 
 def main(args):
